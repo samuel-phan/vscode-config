@@ -13,18 +13,25 @@ def main():
         PROJECT_FILE = PROJECT_DIR / filename
         VSCODE_FILE = VSCODE_CONFIG_DIR / filename
 
-        if not VSCODE_FILE.is_symlink or VSCODE_FILE.resolve() != PROJECT_FILE:
-            make_backup(VSCODE_FILE)
-            print(f'Create symlink "{VSCODE_FILE}" -> "{PROJECT_FILE}".')
-            VSCODE_FILE.symlink_to(PROJECT_FILE)
-        else:
-            print(f'The Visual Studio Code file "{VSCODE_FILE}" is already pointing to "{PROJECT_FILE}".')
+        if VSCODE_FILE.exists():
+            if not VSCODE_FILE.is_symlink() or VSCODE_FILE.resolve() != PROJECT_FILE:
+                make_backup(VSCODE_FILE)
+                make_symlink(VSCODE_FILE, PROJECT_FILE)
+            else:
+                print(f'The Visual Studio Code file "{VSCODE_FILE}" is already pointing to "{PROJECT_FILE}".')
 
+        else:
+            make_symlink(VSCODE_FILE, PROJECT_FILE)
 
 def make_backup(file):
     backup_file = file.parent / (file.name + '.bak')
     print(f'Create backup file "{file}" -> "{backup_file}".')
     file.rename(backup_file)
+
+
+def make_symlink(src, target):
+    print(f'Create symlink "{src}" -> "{target}".')
+    src.symlink_to(target)
 
 
 if __name__ == "__main__":
